@@ -7508,9 +7508,11 @@ main {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Prediction-Contract">Prediction Contract<a class="anchor-link" href="#Prediction-Contract">¶</a></h2><ul>
-<li>Defined a minimal predictor contract (an abstract base class) so every predictor has: a <code>name</code>, explicit input dependencies via <code>feature_keys</code>, and a single <code>predict(row)</code> method returning a float Tmin from a <code>Mapping</code> or <code>pandas.Series</code>.</li>
+<li>Defined a minimal predictor contract (an abstract base class) that every predictor in the tool kit should follow.</li>
+<li>Any predictor satisfying this contract can plug into the rest of the toolkit.</li>
+<li>Allows the tool kit to be easily extendible to alternate historic methods for calculating overnight minimum temperature. e.g. McKenzie's Method $T_{min} = 0.5(T_{max} + T_{d}) + \hat{K}(\text{surface wind},\text{cloud cover})$</li>
+<li>I don't yet know which alternative methods will be in scope or exactly what their inputs will look like, so the contract is intentionally small and generic.</li>
 <li><code>feature_keys</code> enforces explicit input dependencies alongside units to help prevent accidental misuse.</li>
-<li>Any predictor satisfying this contract can plug into the rest of the toolkit (metrics, plots, optimisers).</li>
 </ul>
 <div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MinTempPredictor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Abstract base for Tmin predictors that operate on a single row/Series."""</span>
@@ -7522,20 +7524,6 @@ main {
     <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Compute Tmin for a single row (mapping or Series)."""</span>
 </pre></div>
-</div>
-</div>
-</div>
-</div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1786626f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Why-do-this?">Why do this?<a class="anchor-link" href="#Why-do-this?">¶</a></h3><ul>
-<li>Allows the tool kit to be easily extendible to alternate historic methods for calculating overnight minimum temperature. e.g. McKenzie's Method $T_{min} = 0.5(T_{max} + T_{d}) + \hat{K}(\text{surface wind},\text{cloud cover})$</li>
-<li>I don't yet know which alternative methods will be in scope or exactly what their inputs will look like, so the contract is intentionally small and generic.</li>
-</ul>
 </div>
 </div>
 </div>
@@ -7555,41 +7543,6 @@ main {
 <li>This ought to be verified with a SME, until then assumptions are clearly documented.</li>
 </ul>
 <p>The linear part is straightforward. The K lookup needs a bit more thought.</p>
-</div>
-</div>
-</div>
-</div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=df2f21cd">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div class="highlight"><pre><span></span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CraddockAndPritchardModel</span><span class="p">(</span><span class="n">MinTempPredictor</span><span class="p">):</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"craddock_and_pritchard"</span>
-    <span class="n">feature_keys</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FeatureKey</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"midday_temp_c"</span><span class="p">,</span> <span class="s2">"deg C"</span><span class="p">),</span>
-        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"midday_dew_point_c"</span><span class="p">,</span> <span class="s2">"deg C"</span><span class="p">),</span>
-        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"geostrophic_wind_kn"</span><span class="p">,</span> <span class="s2">"kn"</span><span class="p">),</span>
-        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"cloud_oktas"</span><span class="p">,</span> <span class="s2">"oktas"</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.316</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.548</span>
-    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.24</span>
-    <span class="n">k_table</span><span class="p">:</span> <span class="n">KTable</span> <span class="o">=</span> <span class="n">KTable</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="o">...</span><span class="p">))</span> <span class="c1"># Omit detail to fit on slide</span>
-    
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Avoid sharing mutable DataFrames across instances.</span>
-        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"k_table"</span><span class="p">,</span> <span class="n">KTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_table</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="n">t12</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"midday_temp_c"</span><span class="p">]</span>
-        <span class="n">td12</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"midday_dew_point_c"</span><span class="p">]</span>
-        <span class="n">wind_kn</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"geostrophic_wind_kn"</span><span class="p">]</span>
-        <span class="n">cloud_oktas</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"cloud_oktas"</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">t12</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">*</span> <span class="n">td12</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_table</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">wind_kn</span><span class="p">,</span> <span class="n">cloud_oktas</span><span class="p">)</span>
-</pre></div>
 </div>
 </div>
 </div>
@@ -7994,7 +7947,7 @@ main {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Boundary behaviour: right-closed bins (first edge &gt;= value)</span>
@@ -8005,7 +7958,7 @@ main {
 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">:</span>
     <span class="n">wind</span><span class="p">,</span> <span class="n">cloud</span> <span class="o">=</span> <span class="n">k_table</span><span class="o">.</span><span class="n">bin_edge</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"wind_kn"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">k_table</span><span class="o">.</span><span class="n">bin_edge</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"cloud_oktas"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">k_val</span> <span class="o">=</span> <span class="n">k_table</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"wind_kn"</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="s2">"cloud_oktas"</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s2">"-&gt;"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">wind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">cloud</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">k_val</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> -&gt; (</span><span class="si">{</span><span class="n">wind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">cloud</span><span class="si">}</span><span class="s2">) -&gt; </span><span class="si">{</span><span class="n">k_val</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     
 </pre></div>
 </div>
@@ -8019,14 +7972,49 @@ main {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>{'wind_kn': 12.5, 'cloud_oktas': 2.0} -&gt; (12.5, 2.0) -2.2
-{'wind_kn': 12.5, 'cloud_oktas': 2.1} -&gt; (12.5, 4.0) -1.7
+<pre>{'wind_kn': 12.5, 'cloud_oktas': 2.0} -&gt; (12.5, 2.0) -&gt; -2.2
+{'wind_kn': 12.5, 'cloud_oktas': 2.1} -&gt; (12.5, 4.0) -&gt; -1.7
 </pre>
 </div>
 </div>
 </div>
 </div>
-</div></div></section></section><section><section>
+</div></div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=df2f21cd">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="highlight"><pre><span></span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CraddockAndPritchardModel</span><span class="p">(</span><span class="n">MinTempPredictor</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"craddock_and_pritchard"</span>
+    <span class="n">feature_keys</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FeatureKey</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"midday_temp_c"</span><span class="p">,</span> <span class="s2">"deg C"</span><span class="p">),</span>
+        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"midday_dew_point_c"</span><span class="p">,</span> <span class="s2">"deg C"</span><span class="p">),</span>
+        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"geostrophic_wind_kn"</span><span class="p">,</span> <span class="s2">"kn"</span><span class="p">),</span>
+        <span class="n">FeatureKey</span><span class="p">(</span><span class="s2">"cloud_oktas"</span><span class="p">,</span> <span class="s2">"oktas"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.316</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.548</span>
+    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.24</span>
+    <span class="n">k_table</span><span class="p">:</span> <span class="n">KTable</span> <span class="o">=</span> <span class="n">KTable</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="o">...</span><span class="p">))</span> <span class="c1"># Omit detail to fit on slide</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Avoid sharing mutable DataFrames across instances.</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"k_table"</span><span class="p">,</span> <span class="n">KTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_table</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">t12</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"midday_temp_c"</span><span class="p">]</span>
+        <span class="n">td12</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"midday_dew_point_c"</span><span class="p">]</span>
+        <span class="n">wind_kn</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"geostrophic_wind_kn"</span><span class="p">]</span>
+        <span class="n">cloud_oktas</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">"cloud_oktas"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">t12</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">*</span> <span class="n">td12</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_table</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">wind_kn</span><span class="p">,</span> <span class="n">cloud_oktas</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div></section></section><section><section>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d858842b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8285,7 +8273,6 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Custom-parameters">Custom parameters<a class="anchor-link" href="#Custom-parameters">¶</a></h2><ul>
 <li>Coefficients <code>a</code>, <code>b</code>, <code>c</code> and the K table can be overridden.</li>
-<li>This keeps the toolkit adaptable to alternate calibrations or methods.</li>
 <li>The forecaster's reference book states that the current default parameters are only valid for areas of eastern England not close to the sea, and that appropriate regression equations need to be developed if the method is to be applied to other areas of the country.</li>
 <li>Could consult SME to see if this work has already been done and parameters already known for other areas, and integrate this into the tool kit.</li>
 </ul>
@@ -8388,7 +8375,6 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 <li><code>evaluate_predictor</code> / <code>evaluate_predictors</code> accept any predictor plus data with the target column.</li>
 <li>Return a <code>PredictionResult</code>: true/pred values, errors, MAE, RMSE, bias.</li>
 <li>Consult Data Scientist/SME on how to handle data anomalies, what accuracy metrics would be useful, and what constitutes 'good'.</li>
-<li>Could be expended to perform sensitivity analysis on particular features.</li>
 </ul>
 <div class="highlight"><pre><span></span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PredictionResult</span><span class="p">:</span>
@@ -8400,9 +8386,6 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
     <span class="n">rmse</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">bias</span><span class="p">:</span> <span class="nb">float</span>
 </pre></div>
-<ul>
-<li>Same flow works for any predictor that implements <code>predict</code>.</li>
-</ul>
 </div>
 </div>
 </div>
@@ -8461,9 +8444,6 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Visualisation">Visualisation<a class="anchor-link" href="#Visualisation">¶</a></h2><ul>
 <li>Plot helpers consume <code>PredictionResult</code> objects.</li>
-<li><code>plot_error_bars</code>: compare MAE/RMSE across methods.</li>
-<li><code>plot_pred_vs_actual</code>: scatter predicted vs actual with ideal line.</li>
-<li>Method-agnostic: works with any predictor following the contract.</li>
 </ul>
 </div>
 </div>
@@ -8473,7 +8453,7 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">min_temp</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_error_bars</span><span class="p">,</span> <span class="n">plot_pred_vs_actual</span>
@@ -8492,6 +8472,19 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div>
 </div>
 </div></div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=198f8d43">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<ul>
+<li><code>plot_error_bars</code>: compare MAE/RMSE across methods.</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="fragment">
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e30510df">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8502,7 +8495,20 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div>
 </div>
 </div>
-</div></section><section>
+</div></div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9dab7588">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<ul>
+<li><code>plot_pred_vs_actual</code>: scatter predicted vs actual with ideal line.</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="fragment">
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c3d7c550">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8513,7 +8519,7 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div>
 </div>
 </div>
-</div></section></section><section><section>
+</div></div></section></section><section><section>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3f0fad71">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8614,7 +8620,7 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </ul>
 </li>
 <li><strong>More comprehensive unit testing</strong><ul>
-<li>Unit tests for boundary behaviour (bin edges), NaN/Unknown cells, and typical data-quality issues</li>
+<li>Unit tests for and typical data-quality issues</li>
 <li>“Known answer” tests from SME-approved examples</li>
 </ul>
 </li>
