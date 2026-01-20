@@ -7468,9 +7468,8 @@ main {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Problem-&amp;-Goal">Problem &amp; Goal<a class="anchor-link" href="#Problem-&amp;-Goal">¶</a></h2><ul>
-<li>A forecaster wants to test a historic method for estimating overnight minimum temperature (Tmin) against "latest modelling".</li>
-<li>Deliverable: a validated, reproducible way to compute predictions and (when targets are available) quantify accuracy.</li>
+<h2 id="Problem">Problem<a class="anchor-link" href="#Problem">¶</a></h2><ul>
+<li>A forecaster wants to test historic methods for estimating overnight minimum temperature (Tmin) against "latest modelling".</li>
 </ul>
 <p>Reference-book method:</p>
 <p>$$T_{\min} = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{cloud cover})$$</p>
@@ -7662,11 +7661,12 @@ main {
 <li>Forecaster/SME should be consulted on right-closed vs left-closed convention.</li>
 <li>"Undefined" and "out of range" case is made to explicitly fail rather than silently guess.</li>
 <li>Implemented via <code>KTable</code> - a pandas DataFrame with validation and useful helpers.</li>
+<li>Can be created by parsing a csv or directly with a DataFrame.</li>
 </ul>
 </div>
 </div>
 </div>
-</div></section><section>
+</div><aside class="notes">
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4410e4af">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7721,31 +7721,20 @@ main {
 </div>
 </div>
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=a1d66106">
+</div>
+</aside><aside class="notes">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a1d66106">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">min_temp</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_k_table</span>
 
 <span class="n">k_table</span> <span class="o">=</span> <span class="n">parse_k_table</span><span class="p">(</span><span class="s2">"k_table.csv"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9f9a7e48">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">k_table</span><span class="o">.</span><span class="n">values</span>
+<span class="n">k_table</span><span class="o">.</span><span class="n">values</span>
 </pre></div>
 </div>
 </div>
@@ -7756,7 +7745,7 @@ main {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7818,7 +7807,8 @@ main {
 </div>
 </div>
 </div>
-</div></div></section><section>
+</div>
+</aside><aside class="notes">
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=64920b2c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7831,12 +7821,14 @@ main {
 </div>
 </div>
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=db081d78">
+</div>
+</aside><aside class="notes">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=db081d78">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -7863,7 +7855,7 @@ main {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7925,7 +7917,8 @@ main {
 </div>
 </div>
 </div>
-</div></div></section><section>
+</div>
+</aside><aside class="notes">
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c5f8f51f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7942,12 +7935,14 @@ main {
 </div>
 </div>
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1a990dd8">
+</div>
+</aside><aside class="notes">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1a990dd8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Boundary behaviour: right-closed bins (first edge &gt;= value)</span>
@@ -7979,7 +7974,8 @@ main {
 </div>
 </div>
 </div>
-</div></div></section><section>
+</div>
+</aside></section><section>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=df2f21cd">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8181,7 +8177,6 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <ul>
-<li>The problem naturally lends itself to wanting to compute multiple rows of data.</li>
 <li>Tool kit easily integrates with Pandas' DataFrames to apply a prediction method on all data rows.</li>
 </ul>
 </div>
