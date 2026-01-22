@@ -8614,17 +8614,17 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 <li>Can provide the basis for a UI to be built on top of if that is what is required</li>
 </ul>
 </li>
-<li>Do not know the the form of the real operation data<ul>
+<li>Do not know the the form of the real data<ul>
 <li>Parsing and prediction is kept separate, and built example parser that can be designed according to requirements</li>
 </ul>
 </li>
 <li>The exercise data does not include "latest modelling" outputs, or whether or not the locations are where the C&amp;P predictor is <em>supposed</em> to be valid<ul>
 <li>Unable to determine the accuracy of the method</li>
-<li>Evaluation code is demonstrated with synthetic target</li>
+<li>Evaluation code is demonstrated with synthetic targets</li>
 </ul>
 </li>
 <li>The reference K-table is ambiguous at boundaries and includes an "Unknown" cell<ul>
-<li>Made a deliberate, documented convention and treated undefined cases as explicit failures/flags rather than guessing</li>
+<li>Made a deliberate, documented convention and treated undefined cases as explicit failures rather than guessing</li>
 </ul>
 </li>
 </ul>
@@ -8675,15 +8675,11 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 <li>Structured error reporting/logging and per-row status so batch runs can complete while flagging exclusions.</li>
 </ul>
 </li>
-<li><strong>More comprehensive unit testing</strong><ul>
-<li>Unit tests for and typical data-quality issues</li>
-<li>“Known answer” tests from SME-approved examples</li>
-</ul>
-</li>
+<li><strong>More comprehensive unit testing</strong></li>
 <li><strong>Externalise parameters and outputs (K tables, coefficients)</strong><ul>
 <li>Store K tables/coefficients as versioned artefacts so that results can refer back to them.</li>
 <li>Support multiple parameter sets by region/site.</li>
-<li>Optimisation/calibration as an optional, auditable workflow</li>
+<li>Optimisation/calibration as an optional workflow</li>
 </ul>
 </li>
 <li><strong>CI/CD</strong><ul>
@@ -8705,7 +8701,7 @@ T_{\min} &amp; = 0.316\,T_{12} + 0.548\,T_{d12} - 1.24 + K(\text{wind},\text{clo
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="What-things-might-you-need-to-consider-if-this-was-part-of-a-larger-project?">What things might you need to consider if this was part of a larger project?<a class="anchor-link" href="#What-things-might-you-need-to-consider-if-this-was-part-of-a-larger-project?">¶</a></h3><ul>
 <li><strong>Collaboration</strong><ul>
-<li>Clear roles (SME, data owners, software/ops)</li>
+<li>Clear roles (SME, data owners, software)</li>
 <li>Review/sign-off points</li>
 <li>Who maintains parameters/tables over time.</li>
 </ul>
